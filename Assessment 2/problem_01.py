@@ -1,57 +1,79 @@
-"""
-The function takes n X n matrix and fetches the sub-matrices using recursion.
-the recursion continues until the base case of 2x2 is reached.
-"""
+def swap_row(matrix, candidate_row=1):
+    """
+    :param matrix: list of lists representing the nxn matrix
+    :param candidate_row: rows to swap with 1st row, starting from 1
+    :return list: list of lists after swapping with nth row having non-zero pivot.
+    """
+    if candidate_row >= len(matrix):
+        return matrix  # No candidate row found; matrix remains unchanged.
+    if matrix[candidate_row][0] != 0:
+        # Swap rows 0 and candidate.
+        matrix[0], matrix[candidate_row] = matrix[candidate_row], matrix[0]  # swapping rows with 0th row
+        return matrix
+
+    return swap_row(matrix, candidate_row + 1)  # continue recursive search until gets a non-zero pivot in 0th row
+
+
+def gaussian_elimination(matrix, col_index=1):
+    """
+    :param matrix: list of lists representing the nxn matrix
+    :param col_index: index of column to perform elimination, starting from 1
+    :return list: list of list after elimination.
+    """
+    if col_index >= len(matrix[0]):  # base case 1 : elimination performed on all columns
+        return matrix
+
+    # base case 2: if the 0th row pivot is zero and only zero even after swapping, then no elimination needed
+    if matrix[0][0] == 0 and swap_row(matrix, 1)[0][0] == 0:
+        return matrix  # terminate if 0th zero pivot
+
+    # Calculate the reduction factor to perform Invariance
+    reduction_factor = matrix[0][col_index] / matrix[0][0]
+
+    # For every row, eliminate the col_index-th element in the first row.
+    # This operation will zero out all matrix[0][col_index].
+    for i in range(len(matrix)):
+        matrix[i][col_index] -= reduction_factor * matrix[i][0]  # perform Invariance: b-ka
+
+    return gaussian_elimination(matrix, col_index + 1)  # continue recursion until any base case executes
+
+
 def determinant(matrix):
     """
     :param matrix: n x n matrix as a list of lists.
     :return float: The determinant of the given n x n matrix.
     """
-    order = len(matrix)     # get the order of matrix
+    order = len(matrix)  # get the order of matrix
 
-    if order == 1:    # base case for 1 x 1 square matrix
-        return matrix[0][0]   # return the only value in 1x1 matrix
+    if order == 1:  # base case 1: 1 x 1 square matrix
+        return matrix[0][0]  # return the only value in 1x1 matrix
 
-    if order == 2:   # base case for 2 x 2 square matrix
+    if order == 2:  # base case 2: 2 x 2 square matrix
         return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]  # terminates the recursion
 
-    result = 0              # initialized for storing determinant value
-    sub_rows = matrix[1:]   # fetch all rows except first row as this row will be used for expanding
-    for i, value in enumerate(matrix[0]):                   # expands through elements of 1st row
-        minor = [row[:i] + row[i + 1:] for row in sub_rows]  # creates sub-matrix(minor) by removing i-th column
+    reduced_matrix = gaussian_elimination(matrix)  # perform gaussian elimination
+    sub_rows = reduced_matrix[1:]  # fetch all rows except first row as this row will be used for expanding
+    minor = [row[1:] for row in sub_rows]  # creates sub-matrix(minor) by removing i-th column
 
-        # first, compute the sign using (-1)^(col+row) formula,here row = 0,thus only column is used.
-        # secondly, current entity is multiplied with sign
-        # finally, operate recursion to get the determinant of minor.
-        result += (-1)**i * value * determinant(minor)
-    return result
+    return reduced_matrix[0][0] * determinant(minor)
 
 
-
-"""
-this function takes the order of square matrix and generates the matrix.
-(i**2.71)%50 is just a randomly created just to create random numbers between 1 and 49.
-"""
 def generate_matrix(order):
     """
     :param order: the order of nxn matrix
     :return list: list of lists representing the matrix
     """
-    random_elements = [i for i in range(1, order+1)]        # create a list starting from 1 - order
-    mat = []                    # empty list to store matrix
+    random_elements = [i for i in range(1, order + 1)]  # create a list starting from 1 - order
+    mat = []  # empty list to store matrix
     for i in range(order):
         mat.append(random_elements)
-        random_elements = [int(i ** 2.71) % 50 for i in random_elements]   # random formula to create random values
+        # random formula to create random values between 1 and 49.
+        random_elements = [int(i ** 2.71) % 50 for i in random_elements]
     return mat
 
 
 n = int(input("What is the order of the matrix? : "))
-matrix = generate_matrix(n)         # creates a square matrix of order n
-print(f"Matrix = {matrix}")         # printing the matrix of order n
+matrix = generate_matrix(n)  # creates a square matrix of order n
+print(f"Matrix = {matrix}")  # printing the matrix of order n
 
-det = determinant(matrix)
 print(f'The determinant = {determinant(matrix)}')
-
-
-
-
