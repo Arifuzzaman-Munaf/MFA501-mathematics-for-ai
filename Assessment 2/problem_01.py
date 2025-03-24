@@ -27,15 +27,30 @@ def determinant(matrix):
     return result
 
 
-matrix = [[1, 2, 3],
-          [0, 4, 5],
-          [1, 0, 6]]
+
+"""
+this function takes the order of square matrix and generates the matrix.
+(i**2.71)%50 is just a randomly created just to create random numbers between 1 and 49.
+"""
+def generate_matrix(order):
+    """
+    :param order: the order of nxn matrix
+    :return list: list of lists representing the matrix
+    """
+    random_elements = [i for i in range(1, order+1)]        # create a list starting from 1 - order
+    mat = []                    # empty list to store matrix
+    for i in range(order):
+        mat.append(random_elements)
+        random_elements = [int(i ** 2.71) % 50 for i in random_elements]   # random formula to create random values
+    return mat
+
+
+n = int(input("What is the order of the matrix? : "))
+matrix = generate_matrix(n)         # creates a square matrix of order n
+print(f"Matrix = {matrix}")         # printing the matrix of order n
+
 det = determinant(matrix)
-
 print(f'The determinant = {determinant(matrix)}')
-
-
-
 
 
 
