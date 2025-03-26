@@ -1,3 +1,6 @@
+sign = 1     # determine the sign of value, changes sign each time any row is swapped.
+
+
 def swap_row(matrix, candidate_row=1):
     """
     :param matrix: list of lists representing the nxn matrix
@@ -23,9 +26,15 @@ def gaussian_elimination(matrix, col_index=1):
     if col_index >= len(matrix[0]):  # base case 1 : elimination performed on all columns
         return matrix
 
-    # base case 2: if the 0th row pivot is zero and only zero even after swapping, then no elimination needed
-    if matrix[0][0] == 0 and swap_row(matrix, 1)[0][0] == 0:
-        return matrix  # terminate if 0th zero pivot
+    # base case 2
+    # if the 0th row pivot is zero and only zero even after swapping, then no elimination needed
+    if matrix[0][0] == 0:
+        matrix = swap_row(matrix, 1)
+        if matrix[0][0] == 0:
+            return matrix  # terminate and return the actual matrix if 0th zero pivot
+        else:
+            global sign
+            sign = -sign  # got non-zero pivot after swap, hence changed the sign for determinant
 
     # Calculate the reduction factor to perform Invariance
     reduction_factor = matrix[0][col_index] / matrix[0][0]
@@ -34,6 +43,7 @@ def gaussian_elimination(matrix, col_index=1):
     # This operation will zero out all matrix[0][col_index].
     for i in range(len(matrix)):
         matrix[i][col_index] -= reduction_factor * matrix[i][0]  # perform Invariance: b-ka
+        print(matrix)
 
     return gaussian_elimination(matrix, col_index + 1)  # continue recursion until any base case executes
 
@@ -49,7 +59,7 @@ def determinant(matrix):
         return matrix[0][0]  # return the only value in 1x1 matrix
 
     if order == 2:  # base case 2: 2 x 2 square matrix
-        return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]  # terminates the recursion
+        return sign * (matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0])  # terminates the recursion
 
     reduced_matrix = gaussian_elimination(matrix)  # perform gaussian elimination
     sub_rows = reduced_matrix[1:]  # fetch all rows except first row as this row will be used for expanding
@@ -74,6 +84,8 @@ def generate_matrix(order):
 
 n = int(input("What is the order of the matrix? : "))
 matrix = generate_matrix(n)  # creates a square matrix of order n
+
+# matrix = [[2, 2, 4, 5], [3, 1, 9, 2], [5, 2, 12, 2], [11, 7, 7, 9]]
 print(f"Matrix = {matrix}")  # printing the matrix of order n
 
 print(f'The determinant = {determinant(matrix)}')
